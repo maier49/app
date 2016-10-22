@@ -1,5 +1,6 @@
 import { EventedListener, EventedListenersMap } from 'dojo-compose/mixins/createEvented';
-import createMemoryStore from 'dojo-stores/createMemoryStore';
+import createStore from 'dojo-stores/store/createStore';
+import createObservableStoreMixin from 'dojo-stores/store/mixins/createObservableStoreMixin';
 import Promise from 'dojo-shim/Promise';
 import createActualWidget, { Widget as ActualWidget } from 'dojo-widgets/createWidget';
 import * as registerSuite from 'intern!object';
@@ -16,7 +17,7 @@ import { stub as stubWidgetFactory } from '../../fixtures/widget-factory';
 import widgetInstanceFixture from '../../fixtures/widget-instance';
 import {
 	createAction,
-	createStore,
+	createStoreLike,
 	createWidget,
 	createAsyncSpyWidget,
 	createSpyStore,
@@ -90,7 +91,8 @@ registerSuite({
 		},
 
 		'widget created for custom type observes state'() {
-			const defaultWidgetStore = createMemoryStore();
+			const defaultWidgetStore = createStore
+				.mixin(createObservableStoreMixin())();
 			const app = createApp({ defaultWidgetStore });
 
 			app.registerCustomElementFactory('custom-element', createActualWidget);
@@ -456,7 +458,7 @@ registerSuite({
 
 		'the stateFrom option is set to the default widget store, if any'() {
 			let actual: { [p: string]: any };
-			const store = createStore();
+			const store = createStoreLike();
 			const app = createApp({ defaultWidgetStore: store });
 			app.registerWidgetFactory('foo', (options: any) => {
 				actual = options;
@@ -798,7 +800,7 @@ registerSuite({
 
 			'the factory\'s stateFrom option is set to the default widget store, if any'() {
 				let actual: { [p: string]: any };
-				const store = createStore();
+				const store = createStoreLike();
 				const app = createApp({ defaultWidgetStore: store });
 				app.loadDefinition({
 					widgets: [
@@ -820,8 +822,8 @@ registerSuite({
 
 			'the definition\'s stateFrom option takes precedence over the default widget store, if any'() {
 				let actual: { [p: string]: any };
-				const app = createApp({ defaultWidgetStore: createStore() });
-				const store = createStore();
+				const app = createApp({ defaultWidgetStore: createStoreLike() });
+				const store = createStoreLike();
 				app.loadDefinition({
 					widgets: [
 						{
@@ -1092,7 +1094,7 @@ registerSuite({
 
 			'with stateFrom option': {
 				'factory is passed a store reference in its stateFrom option'() {
-					const expected = createStore();
+					const expected = createStoreLike();
 					let actual: StoreLike;
 
 					const app = createApp();
@@ -1116,7 +1118,7 @@ registerSuite({
 				},
 
 				'stateFrom may be an actual store, rather than a store identifier'() {
-					const expected = createStore();
+					const expected = createStoreLike();
 					let actual: StoreLike;
 
 					const app = createApp();
@@ -1144,7 +1146,7 @@ registerSuite({
 					let calls: string[] = [];
 					let addArgs: any[][] = [];
 
-					const store = createStore();
+					const store = createStoreLike();
 					(<any> store).add = (...args: any[]) => {
 						calls.push('add');
 						addArgs.push(args);
@@ -1178,7 +1180,7 @@ registerSuite({
 					let calls: string[] = [];
 					let addArgs: any[][] = [];
 
-					const store = createStore();
+					const store = createStoreLike();
 					(<any> store).add = (...args: any[]) => {
 						calls.push('add');
 						addArgs.push(args);
@@ -1211,7 +1213,7 @@ registerSuite({
 				'the factory is called even if adding state fails'() {
 					let calls: string[] = [];
 
-					const store = createStore();
+					const store = createStoreLike();
 					(<any> store).add = (...args: any[]) => {
 						calls.push('add');
 						return Promise.reject(new Error());

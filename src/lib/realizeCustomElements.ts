@@ -355,7 +355,7 @@ export default function realizeCustomElements(
 								if (initialState) {
 									return store.add(initialState, { id })
 										// Ignore error, assume store already contains state for this widget.
-										.catch(() => undefined)
+										.then(null, () => undefined)
 										.then(() => factory(options));
 								}
 							}

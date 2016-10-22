@@ -8,7 +8,7 @@ import createApp, { DEFAULT_ACTION_STORE, DEFAULT_WIDGET_STORE } from 'src/creat
 import { stub as stubActionFactory } from '../fixtures/action-factory';
 import {
 	createAction,
-	createStore,
+	createStoreLike,
 	createWidget,
 	rejects,
 	strictEqual
@@ -24,24 +24,24 @@ registerSuite({
 			assert.isUndefined(createApp().defaultActionStore);
 		},
 		'can be set at creation time'() {
-			const store = createStore();
+			const store = createStoreLike();
 			const app = createApp({ defaultActionStore: store });
 			assert.strictEqual(app.defaultActionStore, store);
 		},
 		'can be set after creation'() {
-			const store = createStore();
+			const store = createStoreLike();
 			const app = createApp();
 			app.defaultActionStore = store;
 			assert.strictEqual(app.defaultActionStore, store);
 		},
 		'can only be set once'() {
-			const store = createStore();
+			const store = createStoreLike();
 			const app = createApp({ defaultActionStore: store });
-			assert.throws(() => app.defaultActionStore = createStore(), Error);
+			assert.throws(() => app.defaultActionStore = createStoreLike(), Error);
 			assert.strictEqual(app.defaultActionStore, store);
 		},
 		'ends up in the registry'() {
-			const store = createStore();
+			const store = createStoreLike();
 			const app = createApp({ defaultActionStore: store });
 			assert.strictEqual(app.identifyStore(store), DEFAULT_ACTION_STORE);
 			assert.isTrue(app.hasStore(DEFAULT_ACTION_STORE));
@@ -56,24 +56,24 @@ registerSuite({
 			assert.isUndefined(createApp().defaultWidgetStore);
 		},
 		'can be set at creation time'() {
-			const store = createStore();
+			const store = createStoreLike();
 			const app = createApp({ defaultWidgetStore: store });
 			assert.strictEqual(app.defaultWidgetStore, store);
 		},
 		'can be set after creation'() {
-			const store = createStore();
+			const store = createStoreLike();
 			const app = createApp();
 			app.defaultWidgetStore = store;
 			assert.strictEqual(app.defaultWidgetStore, store);
 		},
 		'can only be set once'() {
-			const store = createStore();
+			const store = createStoreLike();
 			const app = createApp({ defaultWidgetStore: store });
-			assert.throws(() => app.defaultWidgetStore = createStore(), Error);
+			assert.throws(() => app.defaultWidgetStore = createStoreLike(), Error);
 			assert.strictEqual(app.defaultWidgetStore, store);
 		},
 		'ends up in the registry'() {
-			const store = createStore();
+			const store = createStoreLike();
 			const app = createApp({ defaultWidgetStore: store });
 			assert.strictEqual(app.identifyStore(store), DEFAULT_WIDGET_STORE);
 			assert.isTrue(app.hasStore(DEFAULT_WIDGET_STORE));
@@ -98,7 +98,7 @@ registerSuite({
 					stores: [
 						{
 							id: 'bar',
-							factory: createStore
+							factory: createStoreLike
 						}
 					],
 					widgets: [
@@ -166,7 +166,7 @@ registerSuite({
 		const app = createApp({ toAbsMid });
 
 		app.registerAction('action', createAction());
-		app.registerStore('store', createStore());
+		app.registerStore('store', createStoreLike());
 		app.registerWidget('widget', createWidget());
 
 		[
@@ -182,7 +182,7 @@ registerSuite({
 					]
 				});
 			},
-			(id: string) => app.registerStore(id, createStore()),
+			(id: string) => app.registerStore(id, createStoreLike()),
 			(id: string) => app.registerWidget(id, createWidget())
 		].forEach((fn) => {
 			for (const id of ['action', 'store', 'widget']) {
@@ -193,7 +193,7 @@ registerSuite({
 
 	'#registryProvider': (() => {
 		const action = createAction();
-		const store = createStore();
+		const store = createStoreLike();
 		const widget = createWidget();
 		const app = createApp();
 		app.registerAction('action', action);
@@ -233,7 +233,7 @@ registerSuite({
 		const app = createApp();
 
 		const action = createAction();
-		const store = createStore();
+		const store = createStoreLike();
 
 		const handles: Handle[] = [];
 		handles.push(

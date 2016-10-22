@@ -1,6 +1,7 @@
 import { Handle } from 'dojo-core/interfaces';
 import Promise from 'dojo-shim/Promise';
 import createWidget from 'dojo-widgets/createWidget';
+import { ObservableState, State} from 'dojo-compose/mixins/createStateful';
 import * as registerSuite from 'intern!object';
 import * as assert from 'intern/chai!assert';
 
@@ -22,7 +23,7 @@ import { stub as stubStoreFactory } from 'tests/fixtures/store-factory';
 import { stub as stubWidgetFactory } from 'tests/fixtures/widget-factory';
 import {
 	createAction,
-	createStore,
+	createStoreLike,
 	rejects,
 	strictEqual
 } from 'tests/support/createApp';
@@ -196,7 +197,7 @@ registerSuite({
 
 		'data-state-from': {
 			'resolves store, passes to factory'() {
-				const store = createStore();
+				const store = createStoreLike();
 				app.registerStore('store', store);
 
 				const action = createAction();
@@ -215,10 +216,10 @@ registerSuite({
 			},
 
 			'takes precedence over default action store'() {
-				const store = createStore();
+				const store = createStoreLike();
 				app.registerStore('store', store);
 
-				app.defaultActionStore = createStore();
+				app.defaultActionStore = createStoreLike();
 
 				const action = createAction();
 				let received: StoreLike;
@@ -251,7 +252,7 @@ registerSuite({
 				let calls: string[] = [];
 				let addArgs: any[][] = [];
 
-				const store = createStore();
+				const store = createStoreLike();
 				(<any> store).add = (...args: any[]) => {
 					calls.push('add');
 					addArgs.push(args);
@@ -278,7 +279,7 @@ registerSuite({
 				let calls: string[] = [];
 				let addArgs: any[][] = [];
 
-				const store = createStore();
+				const store = createStoreLike();
 				(<any> store).add = (...args: any[]) => {
 					calls.push('add');
 					addArgs.push(args);
@@ -304,7 +305,7 @@ registerSuite({
 			'the action is resolved even if adding state fails'() {
 				let calls: string[] = [];
 
-				const store = createStore();
+				const store = createStoreLike();
 				(<any> store).add = (...args: any[]) => {
 					calls.push('add');
 					return Promise.reject(new Error());
@@ -381,7 +382,7 @@ registerSuite({
 			},
 
 			'declared with data-factory'() {
-				app.defaultActionStore = createStore();
+				app.defaultActionStore = createStoreLike();
 
 				const action = createAction();
 				let options: ActionFactoryOptions | null = null;
@@ -401,7 +402,7 @@ registerSuite({
 			},
 
 			'declared with data-factory, pointing at an AMD module'() {
-				app.defaultActionStore = createStore();
+				app.defaultActionStore = createStoreLike();
 
 				const action = createAction();
 				let options: ActionFactoryOptions | null = null;
@@ -668,7 +669,7 @@ registerSuite({
 			},
 
 			'is passed to the factory'() {
-				const store = createStore();
+				const store = createStoreLike();
 				let received: any = null;
 				stubStoreFactory((options: any) => {
 					received = options;
@@ -757,7 +758,7 @@ registerSuite({
 			},
 
 			'declared with data-factory'() {
-				const store = createStore();
+				const store = createStoreLike();
 				let called = false;
 				stubStoreFactory(() => {
 					called = true;
@@ -772,7 +773,7 @@ registerSuite({
 			},
 
 			'declared with data-factory, pointing at an AMD module'() {
-				const store = createStore();
+				const store = createStoreLike();
 				let called = false;
 				return new Promise((resolve) => {
 					require(['tests/fixtures/generic-amd-factory'], (factory) => {
@@ -795,7 +796,7 @@ registerSuite({
 
 		'with data-type': {
 			'is immediately added as the default action store if data-type=action'() {
-				const store = createStore();
+				const store = createStoreLike();
 				stubStoreFactory(() => store);
 
 				root.innerHTML = '<app-store data-type="action" data-factory="tests/fixtures/store-factory"></app-store>';
@@ -805,7 +806,7 @@ registerSuite({
 			},
 
 			'is immediately added as the default widget store if data-type=widget'() {
-				const store = createStore();
+				const store = createStoreLike();
 				stubStoreFactory(() => store);
 
 				root.innerHTML = '<app-store data-type="widget" data-factory="tests/fixtures/store-factory"></app-store>';
@@ -815,7 +816,7 @@ registerSuite({
 			},
 
 			'causes realize() to reject if used more than once (with the same type)'() {
-				const store = createStore();
+				const store = createStoreLike();
 				stubStoreFactory(() => store);
 
 				root.innerHTML = `
@@ -826,11 +827,11 @@ registerSuite({
 			},
 
 			'causes realize() to reject if there already is a corresponding default store'() {
-				const store = createStore();
+				const store = createStoreLike();
 				stubStoreFactory(() => store);
 
 				root.innerHTML = '<app-store data-type="action" data-factory="tests/fixtures/store-factory"></app-store>';
-				app.defaultActionStore = createStore();
+				app.defaultActionStore = createStoreLike();
 				return rejects(app.realize(root), Error);
 			}
 		},
@@ -923,11 +924,11 @@ registerSuite({
 
 		'data-state-from': {
 			'resolves store, passes to factory'() {
-				const store = createStore();
+				const store = createStoreLike();
 				app.registerStore('store', store);
 
 				const widget = createWidget();
-				let received: StoreLike;
+				let received: StoreLike | ObservableState<State>;
 				stubWidgetFactory((options) => {
 					received = options!.stateFrom!;
 					return widget;
@@ -941,13 +942,13 @@ registerSuite({
 			},
 
 			'takes precedence over default widget store'() {
-				const store = createStore();
+				const store = createStoreLike();
 				app.registerStore('store', store);
 
-				app.defaultWidgetStore = createStore();
+				app.defaultWidgetStore = createStoreLike();
 
 				const widget = createWidget();
-				let received: StoreLike;
+				let received: StoreLike | ObservableState<State>;
 				stubWidgetFactory((options) => {
 					received = options!.stateFrom!;
 					return widget;
@@ -1047,7 +1048,7 @@ registerSuite({
 				let calls: string[] = [];
 				let addArgs: any[][] = [];
 
-				const store = createStore();
+				const store = createStoreLike();
 				(<any> store).add = (...args: any[]) => {
 					calls.push('add');
 					addArgs.push(args);
@@ -1071,7 +1072,7 @@ registerSuite({
 				let calls: string[] = [];
 				let addArgs: any[][] = [];
 
-				const store = createStore();
+				const store = createStoreLike();
 				(<any> store).add = (...args: any[]) => {
 					calls.push('add');
 					addArgs.push(args);
@@ -1094,7 +1095,7 @@ registerSuite({
 			'the widget is resolved even if adding state fails'() {
 				let calls: string[] = [];
 
-				const store = createStore();
+				const store = createStoreLike();
 				(<any> store).add = (...args: any[]) => {
 					calls.push('add');
 					return Promise.reject(new Error());
@@ -1165,7 +1166,7 @@ registerSuite({
 			},
 
 			'declared with data-factory'() {
-				app.defaultWidgetStore = createStore();
+				app.defaultWidgetStore = createStoreLike();
 
 				const widget = createWidget();
 				let options: WidgetFactoryOptions;
@@ -1183,7 +1184,7 @@ registerSuite({
 			},
 
 			'declared with data-factory, pointing at an AMD module'() {
-				app.defaultWidgetStore = createStore();
+				app.defaultWidgetStore = createStoreLike();
 
 				const widget = createWidget();
 				let options: WidgetFactoryOptions;

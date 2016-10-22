@@ -12,7 +12,7 @@ import { stub as stubActionFactory } from '../../fixtures/action-factory';
 import actionInstanceFixture from '../../fixtures/action-instance';
 import {
 	createAction,
-	createStore,
+	createStoreLike,
 	invert,
 	rejects,
 	strictEqual
@@ -68,7 +68,7 @@ registerSuite({
 
 		'called with a registered non-action instance'() {
 			const app = createApp();
-			const store = createStore();
+			const store = createStoreLike();
 			app.registerStore('foo', store);
 			assert.throws(() => {
 				app.identifyAction(<any> store);
@@ -586,7 +586,7 @@ registerSuite({
 			},
 
 			'factory is passed a store reference in its stateFrom option'() {
-				const expected = createStore();
+				const expected = createStoreLike();
 				let actual: StoreLike;
 
 				const app = createApp();
@@ -610,7 +610,7 @@ registerSuite({
 			},
 
 			'stateFrom may be an actual store, rather than a store identifier'() {
-				const expected = createStore();
+				const expected = createStoreLike();
 				let actual: StoreLike;
 
 				const app = createApp();
@@ -633,10 +633,10 @@ registerSuite({
 			},
 
 			'overrides the default action store'() {
-				const expected = createStore();
+				const expected = createStoreLike();
 				let actual: StoreLike;
 
-				const defaultActionStore = createStore();
+				const defaultActionStore = createStoreLike();
 				const app = createApp({ defaultActionStore });
 				app.loadDefinition({
 					actions: [
@@ -662,7 +662,7 @@ registerSuite({
 				let calls: string[] = [];
 				let addArgs: any[][] = [];
 
-				const store = createStore();
+				const store = createStoreLike();
 				(<any> store).add = (...args: any[]) => {
 					calls.push('add');
 					addArgs.push(args);
@@ -696,7 +696,7 @@ registerSuite({
 				let calls: string[] = [];
 				let addArgs: any[][] = [];
 
-				const store = createStore();
+				const store = createStoreLike();
 				(<any> store).add = (...args: any[]) => {
 					calls.push('add');
 					addArgs.push(args);
@@ -729,7 +729,7 @@ registerSuite({
 			'the factory is called even if adding state fails'() {
 				let calls: string[] = [];
 
-				const store = createStore();
+				const store = createStoreLike();
 				(<any> store).add = (...args: any[]) => {
 					calls.push('add');
 					return Promise.reject(new Error());
@@ -983,7 +983,7 @@ registerSuite({
 				const action = createAction();
 				let received: StoreLike;
 
-				const defaultActionStore = createStore();
+				const defaultActionStore = createStoreLike();
 				const app = createApp({ defaultActionStore });
 
 				app.loadDefinition({

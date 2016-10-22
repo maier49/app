@@ -9,7 +9,7 @@ import createApp, {
 import { stub as stubStoreFactory } from '../../fixtures/store-factory';
 import storeInstanceFixture from '../../fixtures/store-instance';
 import {
-	createStore,
+	createStoreLike,
 	createWidget,
 	invert,
 	rejects,
@@ -28,7 +28,7 @@ registerSuite({
 		},
 
 		'provides registered store'() {
-			const expected = createStore();
+			const expected = createStoreLike();
 
 			const app = createApp();
 			app.registerStore('foo', expected);
@@ -44,7 +44,7 @@ registerSuite({
 
 		'registered store'() {
 			const app = createApp();
-			app.registerStore('foo', createStore());
+			app.registerStore('foo', createStoreLike());
 
 			assert.isTrue(app.hasStore('foo'));
 		}
@@ -53,12 +53,12 @@ registerSuite({
 	'#identifyStore': {
 		'store instance has not been registered'() {
 			assert.throws(() => {
-				createApp().identifyStore(createStore());
+				createApp().identifyStore(createStoreLike());
 			}, Error, 'Could not identify store');
 		},
 
 		'store instance has been registered'() {
-			const store = createStore();
+			const store = createStoreLike();
 			const app = createApp();
 			app.registerStore('foo', store);
 			assert.equal(app.identifyStore(store), 'foo');
@@ -76,7 +76,7 @@ registerSuite({
 
 	'#registerStore': {
 		'store may only be registered once'() {
-			const store = createStore();
+			const store = createStoreLike();
 			const app = createApp();
 			app.registerStore('foo', store);
 
@@ -89,7 +89,7 @@ registerSuite({
 
 		'destroying the returned handle': {
 			'deregisters the action'() {
-				const store = createStore();
+				const store = createStoreLike();
 				const app = createApp();
 
 				const handle = app.registerStore('foo', store);
@@ -100,7 +100,7 @@ registerSuite({
 			},
 
 			'a second time has no effect'() {
-				const store = createStore();
+				const store = createStoreLike();
 
 				const app = createApp();
 				const handle = app.registerStore('foo', store);
@@ -115,7 +115,7 @@ registerSuite({
 	'#registerStoreFactory': {
 		'hasStore returns true after'() {
 			const app = createApp();
-			app.registerStoreFactory('foo', createStore);
+			app.registerStoreFactory('foo', createStoreLike);
 
 			assert.isTrue(app.hasStore('foo'));
 		},
@@ -126,7 +126,7 @@ registerSuite({
 			const app = createApp();
 			app.registerStoreFactory('foo', function(): StoreLike {
 				called = true;
-				return createStore();
+				return createStoreLike();
 			});
 
 			assert.isFalse(called);
@@ -144,7 +144,7 @@ registerSuite({
 
 		'factory is only called once'() {
 			let count = 0;
-			const expected = createStore();
+			const expected = createStoreLike();
 
 			const app = createApp();
 			app.registerStoreFactory('foo', function(): StoreLike {
@@ -162,7 +162,7 @@ registerSuite({
 
 		'factory may return a promise': {
 			'should resolve with the store'() {
-				const expected = createStore();
+				const expected = createStoreLike();
 
 				const app = createApp();
 				app.registerStoreFactory('foo', () => Promise.resolve(expected));
@@ -181,7 +181,7 @@ registerSuite({
 		},
 
 		'the produced store must be unique'() {
-			const store = createStore();
+			const store = createStoreLike();
 			const app = createApp();
 			app.registerStore('foo', store);
 			app.registerStoreFactory('bar', () => store);
@@ -192,14 +192,14 @@ registerSuite({
 		'destroying the returned handle': {
 			'deregisters the factory'() {
 				const app = createApp();
-				const handle = app.registerStoreFactory('foo', createStore);
+				const handle = app.registerStoreFactory('foo', createStoreLike);
 				handle.destroy();
 
 				assert.isFalse(app.hasStore('foo'));
 			},
 
 			'prevents a pending store instance from being registered'() {
-				const store = createStore();
+				const store = createStoreLike();
 				const { resolve, promise } = defer();
 
 				const app = createApp();
@@ -216,7 +216,7 @@ registerSuite({
 
 			'deregisters the store if it has already been created'() {
 				const app = createApp();
-				const handle = app.registerStoreFactory('foo', createStore);
+				const handle = app.registerStoreFactory('foo', createStoreLike);
 
 				return app.getStore('foo').then(() => {
 					handle.destroy();
@@ -227,7 +227,7 @@ registerSuite({
 
 			'a second time has no effect'() {
 				const app = createApp();
-				const handle = app.registerStoreFactory('foo', createStore);
+				const handle = app.registerStoreFactory('foo', createStoreLike);
 
 				return app.getStore('foo').then(() => {
 					handle.destroy();
@@ -242,8 +242,8 @@ registerSuite({
 	'#loadDefinition': {
 		'registers multiple'() {
 			const expected = {
-				foo: createStore(),
-				bar: createStore()
+				foo: createStoreLike(),
+				bar: createStoreLike()
 			};
 
 			const app = createApp();
@@ -283,7 +283,7 @@ registerSuite({
 
 		'with factory option': {
 			'can be a method'() {
-				const expected = createStore();
+				const expected = createStoreLike();
 
 				const app = createApp();
 				app.loadDefinition({
@@ -299,7 +299,7 @@ registerSuite({
 			},
 
 			'can be a module identifier'() {
-				const expected = createStore();
+				const expected = createStoreLike();
 				stubStoreFactory(() => expected);
 
 				const app = createApp({ toAbsMid });
@@ -336,7 +336,7 @@ registerSuite({
 				};
 				stubStoreFactory(() => {
 					called.bar = true;
-					return createStore();
+					return createStoreLike();
 				});
 
 				const app = createApp({ toAbsMid });
@@ -346,7 +346,7 @@ registerSuite({
 							id: 'foo',
 							factory() {
 								called.foo = true;
-								return createStore();
+								return createStoreLike();
 							}
 						},
 						{
@@ -377,8 +377,8 @@ registerSuite({
 			'factory may return a promise': {
 				'should resolve with the store'() {
 					const expected = {
-						foo: createStore(),
-						bar: createStore()
+						foo: createStoreLike(),
+						bar: createStoreLike()
 					};
 					stubStoreFactory(() => {
 						return Promise.resolve(expected.bar);
@@ -445,7 +445,7 @@ registerSuite({
 				};
 				stubStoreFactory((options) => {
 					(<any> actual).bar = options;
-					return createStore();
+					return createStoreLike();
 				});
 
 				const app = createApp({ toAbsMid });
@@ -455,7 +455,7 @@ registerSuite({
 							id: 'foo',
 							factory(options) {
 								(<any> actual).foo = options;
-								return createStore();
+								return createStoreLike();
 							},
 							options: expected.foo
 						},
@@ -481,7 +481,7 @@ registerSuite({
 
 		'with instance option': {
 			'can be an instance'() {
-				const expected = createStore();
+				const expected = createStoreLike();
 
 				const app = createApp();
 				app.loadDefinition({
@@ -530,7 +530,7 @@ registerSuite({
 						stores: [
 							{
 								id: 'foo',
-								instance: createStore(),
+								instance: createStoreLike(),
 								options: {}
 							}
 						]

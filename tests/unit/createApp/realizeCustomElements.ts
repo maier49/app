@@ -17,7 +17,7 @@ import createApp, {
 
 import {
 	createAction,
-	createStore,
+	createStoreLike,
 	createWidget,
 	rejects,
 	strictEqual
@@ -488,7 +488,7 @@ registerSuite({
 				actual = <any> options;
 				return createActualWidget({ tagName: 'mark' });
 			});
-			const expected = createStore();
+			const expected = createStoreLike();
 			app.registerStore('store', expected);
 			projector.innerHTML = `<foo-bar data-state-from="store" id="foo"></foo-bar>`;
 			return app.realize(root).then(() => {
@@ -503,9 +503,9 @@ registerSuite({
 				actual = <any> options;
 				return createActualWidget({ tagName: 'mark' });
 			});
-			const expected = createStore();
+			const expected = createStoreLike();
 			app.registerStore('store', expected);
-			app.registerStore('otherStore', createStore());
+			app.registerStore('otherStore', createStoreLike());
 			projector.setAttribute('data-state-from', 'otherStore');
 			projector.innerHTML = `<foo-bar data-state-from="store" id="foo"></foo-bar>`;
 			return app.realize(root).then(() => {
@@ -516,12 +516,12 @@ registerSuite({
 
 		'takes precedence over the default widget store'() {
 			let actual: { stateFrom: StoreLike };
-			const app = createApp({ defaultWidgetStore: createStore() });
+			const app = createApp({ defaultWidgetStore: createStoreLike() });
 			app.registerCustomElementFactory('foo-bar', (options) => {
 				actual = <any> options;
 				return createActualWidget({ tagName: 'mark' });
 			});
-			const expected = createStore();
+			const expected = createStoreLike();
 			app.registerStore('store', expected);
 			projector.innerHTML = `<foo-bar data-state-from="store" id="foo"></foo-bar>`;
 			return app.realize(root).then(() => {
@@ -536,7 +536,7 @@ registerSuite({
 				actual = <any> options;
 				return createActualWidget({ tagName: 'mark' });
 			});
-			app.registerStore('store', createStore());
+			app.registerStore('store', createStoreLike());
 			projector.innerHTML = `<foo-bar data-state-from="store" data-options="{}"></foo-bar>`;
 			return app.realize(root).then(() => {
 				assert.isOk(actual);
@@ -599,7 +599,7 @@ registerSuite({
 				actual = <any> options;
 				return createActualWidget({ tagName: 'mark' });
 			});
-			const expected = createStore();
+			const expected = createStoreLike();
 			app.registerStore('store', expected);
 			projector.setAttribute('data-state-from', 'store');
 			projector.innerHTML = `<foo-bar id="foo"></foo-bar>`;
@@ -611,12 +611,12 @@ registerSuite({
 
 		'takes precedence over the default widget store'() {
 			let actual: { stateFrom: StoreLike };
-			const app = createApp({ defaultWidgetStore: createStore() });
+			const app = createApp({ defaultWidgetStore: createStoreLike() });
 			app.registerCustomElementFactory('foo-bar', (options) => {
 				actual = <any> options;
 				return createActualWidget({ tagName: 'mark' });
 			});
-			const expected = createStore();
+			const expected = createStoreLike();
 			app.registerStore('store', expected);
 			projector.setAttribute('data-state-from', 'store');
 			projector.innerHTML = `<foo-bar id="foo"></foo-bar>`;
@@ -632,7 +632,7 @@ registerSuite({
 				actual = <any> options;
 				return createActualWidget({ tagName: 'mark' });
 			});
-			app.registerStore('store', createStore());
+			app.registerStore('store', createStoreLike());
 			projector.setAttribute('data-state-from', '');
 			projector.innerHTML = `<foo-bar data-options="{}"></foo-bar>`;
 			return app.realize(root).then(() => {
@@ -645,7 +645,7 @@ registerSuite({
 	'the app has a default widget store': {
 		'if the element has an ID, causes the custom element factory to be called with a stateFrom option set to the store'() {
 			let actual: { stateFrom: StoreLike };
-			const expected = createStore();
+			const expected = createStoreLike();
 			const app = createApp({ defaultWidgetStore: expected });
 			app.registerCustomElementFactory('foo-bar', (options) => {
 				actual = <any> options;
@@ -662,7 +662,7 @@ registerSuite({
 	'data-state attribute': {
 		'realization fails if the data-state value is not valid JSON'() {
 			app.registerCustomElementFactory('foo-bar', createActualWidget);
-			app.registerStore('store', createStore());
+			app.registerStore('store', createStoreLike());
 			projector.innerHTML = '<foo-bar id="widget" data-state-from="store" data-state=\'}\'></foo-bar>';
 			return rejects(app.realize(root), SyntaxError).then((err) => {
 				assert.match(err.message, /^Invalid data-state:/);
@@ -672,7 +672,7 @@ registerSuite({
 
 		'realization fails if the data-state value does not encode an object'() {
 			app.registerCustomElementFactory('foo-bar', createActualWidget);
-			app.registerStore('store', createStore());
+			app.registerStore('store', createStoreLike());
 			projector.innerHTML = '<foo-bar id="widget" data-state-from="store" data-state=\'null\'></foo-bar>';
 			return rejects(app.realize(root), TypeError, 'Expected object from data-state (in "null")').then(() => {
 				projector.innerHTML = '<foo-bar id="widget" data-state-from="store" data-state=\'42\'></foo-bar>';
@@ -684,7 +684,7 @@ registerSuite({
 			let calls: string[] = [];
 			let addArgs: any[][] = [];
 
-			const store = createStore();
+			const store = createStoreLike();
 			(<any> store).add = (...args: any[]) => {
 				calls.push('add');
 				addArgs.push(args);
@@ -707,7 +707,7 @@ registerSuite({
 		'creates the widget even if adding state fails'() {
 			let calls: string[] = [];
 
-			const store = createStore();
+			const store = createStoreLike();
 			(<any> store).add = (...args: any[]) => {
 				calls.push('add');
 				return Promise.reject(new Error());

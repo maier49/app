@@ -141,7 +141,7 @@ export function makeActionFactory(definition: ActionDefinition, resolveMid: Reso
 			if (store && initialState) {
 				return store.add(initialState, { id })
 					// Ignore error, assume store already contains state for this widget.
-					.catch(() => {})
+					.then(null, () => {})
 					.then(() => factory(options));
 			}
 
@@ -244,7 +244,7 @@ export function makeWidgetFactory(definition: WidgetDefinition, resolveMid: Reso
 			if (store && initialState) {
 				return store.add(initialState, { id })
 					// Ignore error, assume store already contains state for this widget.
-					.catch(() => undefined)
+					.then(null, () => undefined)
 					.then(() => factory(options));
 			}
 

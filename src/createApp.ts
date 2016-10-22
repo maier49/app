@@ -1,15 +1,18 @@
 import { Action } from 'dojo-actions/createAction';
 import compose, { ComposeFactory } from 'dojo-compose/compose';
 import { EventedListener, EventedListenersMap } from 'dojo-compose/mixins/createEvented';
-import { ObservableState, State } from 'dojo-compose/mixins/createStateful';
+import { Observable } from 'rxjs/Rx';
+import { ObservableState, State} from 'dojo-compose/mixins/createStateful';
 import { Handle } from 'dojo-core/interfaces';
-import IdentityRegistry from 'dojo-core/IdentityRegistry';
+import IdentityRegistry, { Identity } from 'dojo-core/IdentityRegistry';
 import { assign } from 'dojo-core/lang';
 import Promise from 'dojo-shim/Promise';
 import Set from 'dojo-shim/Set';
 import Symbol from 'dojo-shim/Symbol';
 import WeakMap from 'dojo-shim/WeakMap';
 import { Child } from 'dojo-widgets/mixins/interfaces';
+import { StoreObservable } from 'dojo-stores/store/createStoreObservable';
+import { PatchArgument } from 'dojo-stores/store/createStore';
 
 import extractRegistrationElements from './lib/extractRegistrationElements';
 import {
@@ -37,9 +40,12 @@ export type ActionLike = Action<any, any, any>;
 /**
  * Any kind of store.
  */
-export type StoreLike = ObservableState<State> & {
-	add<T>(item: T, options?: any): Promise<T>;
-	get<T>(id: string): Promise<T>;
+export type StoreLike = {
+	add<T>(item: T, options?: any): StoreObservable<T, any>;
+	get<T>(ids: string | string[]): Promise<T[]>;
+	patch<T>(patch: PatchArgument<T>, options?: any): StoreObservable<T, any>;
+	delete(ids: string | string[]): StoreObservable<String, any>;
+	observe<T>(id: string): Observable<T>;
 }
 
 /**
@@ -93,7 +99,7 @@ export interface WidgetFactoryOptions {
 	 *
 	 * It's the factories responsibility to create a widget that observes the store.
 	 */
-	stateFrom?: StoreLike;
+	stateFrom?: StoreLike | ObservableState<State>;
 }
 
 /**
@@ -579,7 +585,8 @@ function createCustomWidget(app: App, id: string) {
 		throw new Error('A default widget store must be configured in order to create custom widgets');
 	}
 
-	return defaultWidgetStore.get(id).then((state: any) => {
+	return defaultWidgetStore.get(id).then((states: any[]) => {
+		const state = states[0];
 		const { customElementFactories, widgetFactories, widgetInstances } = privateStateMap.get(app);
 
 		const hasRegisteredFactory = widgetFactories.has(id);
@@ -1087,7 +1094,9 @@ const createApp = compose({
 				return Promise.resolve(exists);
 			}
 			else {
-				return defaultWidgetStore.get(id).then(({ type }) => customElementFactories.has(type));
+				return defaultWidgetStore.get<{ type: Identity }>(id).then((results) => {
+					return results.every(({ type }) => customElementFactories.has(type));
+				});
 			}
 		},
 

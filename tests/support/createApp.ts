@@ -1,4 +1,5 @@
 import Promise from 'dojo-shim/Promise';
+import { StoreObservable } from 'dojo-stores/store/createStoreObservable';
 import * as assert from 'intern/chai!assert';
 import compose from 'dojo-compose/compose';
 import Map from 'dojo-shim/Map';
@@ -17,31 +18,36 @@ export function createAction(): ActionLike {
 	};
 }
 
-export function createStore(): StoreLike {
+export function createStoreLike(): StoreLike {
 	return <StoreLike> {};
 }
 
 export const createSpyStore = compose({
-	add(this: any, ...args: any[]): Promise<any> {
+	add(this: any, ...args: any[]): StoreObservable<any, any> {
 		this._add.push(args);
 		const id = args ? args[0].id : null;
 		if (id) {
 			this._map.set(id, args[0]);
 		}
-		return Promise.resolve({});
+		return <any> Promise.resolve({});
 	},
 	get(this: any, id: string): Promise<any> {
-		return Promise.resolve(this._map.get(id));
+		return Promise.resolve([this._map.get(id)]);
 	},
 	_add: [] as any[][],
 	_map: new Map<string, any>(),
 	observe(...args: any[]): any {},
 	_observe: [] as any[][],
-	patch(this: any, ...args: any[]): Promise<any> {
+	patch(this: any, ...args: any[]): StoreObservable<any, any> {
 		this._patch.push(args);
-		return Promise.resolve({});
+		return <any> Promise.resolve({});
 	},
 	_patch: [] as any[][],
+	delete(this: any, ...args: any[]): StoreObservable<string, any> {
+		this._delete.push(args);
+		return <any> Promise.resolve({});
+	},
+	_delete: [] as any[][],
 	_options: undefined as any
 }, (instance, options) => {
 	instance._options = options;
